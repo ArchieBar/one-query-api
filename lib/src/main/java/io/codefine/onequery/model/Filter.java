@@ -38,10 +38,10 @@ public record Filter(String tableField, Prefix prefix, String[] values) {
     /**
      * {@code Not equlas} represents an inequality of two fields, the field that is passed as {@code
      * tableField} must not be equal to the passed value. The first element in the array will be
-     * treated as {@code AND}, all subsequent values will be treated as {@code OR}
+     * treated as {@code AND}, all subsequent values will be treated as {@code AND}
      *
      * <p>Incoming value example: {@code NE : [1, 2, ...N]}, example of a heralded value: {@code
-     * field != 1 or field != 2 or ... field != N}
+     * field <> 1 and field <> 2 and ... field <> N}
      *
      * <p><b>Important</b>, the above is relevant to the implementation of getting conditions in
      * {@link OneQuery}

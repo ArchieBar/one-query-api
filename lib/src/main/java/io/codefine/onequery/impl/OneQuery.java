@@ -530,7 +530,7 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
       final TableField<R, T> tableFiled, final String[] conditionValue) {
     Condition condition = tableFiled.ne((T) conditionValue[0]);
     for (int i = 1; i < conditionValue.length; i++) {
-      condition = condition.or(tableFiled.ne((T) conditionValue[i]));
+      condition = condition.and(tableFiled.ne((T) conditionValue[i]));
     }
     return condition;
   }
