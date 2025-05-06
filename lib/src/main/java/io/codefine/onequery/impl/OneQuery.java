@@ -459,6 +459,8 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
         case NE -> conditions.add(getNotEqualsCondition(tableFiled, value));
         case SW -> conditions.add(getStartsWithCondition(tableFiled, value));
         case EW -> conditions.add(getEndsWithCondition(tableFiled, value));
+        case IS_NULL -> conditions.add(getEqualsNullCondition(tableFiled));
+        case IS_NOT_NULL -> conditions.add(getNotEqualsNullCondition(tableFiled));
       }
     }
     return conditions;
@@ -559,6 +561,14 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
       condition = condition.or(tableFiled.endsWith((T) conditionValue[i]));
     }
     return condition;
+  }
+
+  private <T> Condition getEqualsNullCondition(final TableField<R, T> tableFiled) {
+    return tableFiled.isNull();
+  }
+
+  private <T> Condition getNotEqualsNullCondition(final TableField<R, T> tableFiled) {
+    return tableFiled.isNotNull();
   }
 
   /* ---------- private methods sort -------------------------------------------------------------------------------- */

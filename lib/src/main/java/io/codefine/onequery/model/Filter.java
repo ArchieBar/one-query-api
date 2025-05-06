@@ -105,7 +105,25 @@ public record Filter(String tableField, Prefix prefix, String[] values) {
      * <p><b>Important</b>, the above is relevant to the implementation of getting conditions in
      * {@link OneQuery}
      */
-    BW(6, "between");
+    BW(6, "between"),
+
+    /**
+     * {@code Equals} represents the equality of two fields, the field that is passed as {@code
+     * tableField} must be equal to the null value passed.
+     *
+     * <p><b>Important</b>, the above is relevant to the implementation of getting conditions in
+     * {@link OneQuery}
+     */
+    IS_NULL(7, "is null"),
+
+    /**
+     * {@code Equals} represents the equality of two fields, the field that is passed as {@code
+     * tableField} must be equal to the not null value passed.
+     *
+     * <p><b>Important</b>, the above is relevant to the implementation of getting conditions in
+     * {@link OneQuery}
+     */
+    IS_NOT_NULL(8, "is not null");
 
     Prefix(int id, String name) {
       this.id = id;
