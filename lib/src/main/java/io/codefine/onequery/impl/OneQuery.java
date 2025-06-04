@@ -1,6 +1,7 @@
 package io.codefine.onequery.impl;
 
 import io.codefine.onequery.OneQueryCollectStep;
+import io.codefine.onequery.OneQueryFetchStep;
 import io.codefine.onequery.OneQueryFilterStep;
 import io.codefine.onequery.OneQueryFromStep;
 import io.codefine.onequery.OneQueryOnStep;
@@ -25,6 +26,7 @@ import org.jooq.DSLContext;
 import org.jooq.OrderField;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
+import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.SelectConnectByStep;
 import org.jooq.SelectFinalStep;
@@ -36,6 +38,7 @@ import org.jooq.SelectQuery;
 import org.jooq.SortField;
 import org.jooq.TableField;
 import org.jooq.TableLike;
+import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 
 /**
@@ -64,6 +67,7 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
         OneQueryOptionalPaginationStep<R>,
         OneQueryPaginationStep<R>,
         OneQueryCollectStep<R>,
+        OneQueryFetchStep<R>,
         OneQueryPaginationResultStep<R> {
 
   /* ---------- variables ------------------------------------------------------------------------------------------- */
@@ -393,6 +397,13 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
   @Override
   public <C> List<C> toList(final RecordMapper<R, C> mapper) {
     return getDelegate().fetch(mapper);
+  }
+
+  /* ---------- .fetch() -------------------------------------------------------------------------------------------- */
+
+  @Override
+  public Result<R> fetch() throws DataAccessException {
+    return getDelegate().fetch();
   }
 
   /* ---------- private methods ------------------------------------------------------------------------------------- */

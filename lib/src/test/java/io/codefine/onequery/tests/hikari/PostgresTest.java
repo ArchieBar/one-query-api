@@ -94,4 +94,12 @@ class PostgresTest extends AbstractIsolatedEnvironment {
     assertThat(withFilter).hasSize(1);
     assertThat(withFilter.get(0)[1]).isEqualTo("Federal Shipping");
   }
+
+  @Test
+  @DisplayName("Test fetch method")
+  void test3() {
+    var result = OneQuery.query(shippersDao.ctx().selectFrom(SHIPPERS)).paginate(0, 1).fetch();
+
+    assertThat(result).hasSize(1);
+  }
 }
