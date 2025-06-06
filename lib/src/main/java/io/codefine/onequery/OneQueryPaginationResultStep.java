@@ -11,7 +11,8 @@ import org.jooq.RecordMapper;
  * @version 0.0.1
  * @author Artur Perun, Artyom Sushchenko
  */
-public interface OneQueryPaginationResultStep<R extends Record> extends OneQueryCollectStep<R> {
+public interface OneQueryPaginationResultStep<R extends Record>
+    extends OneQueryCollectStep<R>, OneQueryFetchStep<R> {
   /**
    * The method takes a class to which all objects in the response must be cast. If you need to
    * welcome an entity to the generated jooq class, you need to use the classes from the <b>{@code

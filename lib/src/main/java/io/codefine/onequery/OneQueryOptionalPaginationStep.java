@@ -10,4 +10,4 @@ import org.jooq.Record;
  * @version 0.0.1
  */
 public interface OneQueryOptionalPaginationStep<R extends Record>
-    extends OneQueryPaginationStep<R>, OneQueryCollectStep<R> {}
+    extends OneQueryPaginationStep<R>, OneQueryCollectStep<R>, OneQueryFetchStep<R> {}
