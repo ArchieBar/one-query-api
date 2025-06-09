@@ -1,0 +1,6 @@
+io.codefine.onequery
+io.codefine.onequery.configuration
+io.codefine.onequery.impl
+io.codefine.onequery.mapper
+io.codefine.onequery.mapper.impl
+io.codefine.onequery.model

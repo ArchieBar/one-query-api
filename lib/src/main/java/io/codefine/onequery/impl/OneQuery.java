@@ -1,7 +1,9 @@
 package io.codefine.onequery.impl;
 
 import io.codefine.onequery.OneQueryCollectStep;
+import io.codefine.onequery.OneQueryCommonTableStep;
 import io.codefine.onequery.OneQueryFetchStep;
+import io.codefine.onequery.OneQueryFieldsStep;
 import io.codefine.onequery.OneQueryFilterStep;
 import io.codefine.onequery.OneQueryFromStep;
 import io.codefine.onequery.OneQueryOnStep;
@@ -9,6 +11,7 @@ import io.codefine.onequery.OneQueryOptionalPaginationStep;
 import io.codefine.onequery.OneQueryPaginationResultStep;
 import io.codefine.onequery.OneQueryPaginationStep;
 import io.codefine.onequery.OneQuerySortStep;
+import io.codefine.onequery.mapper.OneQueryMapper;
 import io.codefine.onequery.model.Filter;
 import io.codefine.onequery.model.Page;
 import io.codefine.onequery.model.PaginationResult;
@@ -18,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jooq.AggregateFunction;
+import org.jooq.CommonTableExpression;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -65,6 +69,8 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
         OneQueryPaginationStep<R>,
         OneQueryCollectStep<R>,
         OneQueryFetchStep<R>,
+        OneQueryFieldsStep<R>,
+        OneQueryCommonTableStep<R>,
         OneQueryPaginationResultStep<R> {
 
   /* ---------- variables ------------------------------------------------------------------------------------------- */
@@ -86,6 +92,18 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
    * correct return of the {@link PaginationResult} object
    */
   private Long total;
+
+  /**
+   * A field that contains the variable names for the CTE if called {@link
+   * OneQueryFieldsStep#fields(String...)}
+   */
+  private String[] fields;
+
+  /**
+   * Mapper is used to get {@link TableField} objects in some methods, be automatically from {@link
+   * org.jooq.SQLDialect} when calling {@code .query()}
+   */
+  private OneQueryMapper mapper;
 
   /* ---------- constructors ---------------------------------------------------------------------------------------- */
 
@@ -390,6 +408,19 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
     return this;
   }
 
+  @Override
+  public Long getTotal() {
+    return total;
+  }
+
+  /* ---------- .fields() ------------------------------------------------------------------------------------------- */
+
+  @Override
+  public OneQueryCommonTableStep<R> fields(final String... fields) {
+    this.fields = fields;
+    return this;
+  }
+
   /* ---------- .toPaginationResult() ------------------------------------------------------------------------------- */
 
   @Override
@@ -423,6 +454,16 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
     return getDelegate().fetch();
   }
 
+  /* ---------- .toCommonTable() ------------------------------------------------------------------------------------ */
+
+  @Override
+  public CommonTableExpression<R> toCommonTable(final String name) {
+    if (fields.length == 0) {
+      return DSL.name(name).as(getDelegate());
+    }
+    return DSL.name(name).fields(fields).as(getDelegate());
+  }
+
   /* ---------- private methods ------------------------------------------------------------------------------------- */
 
   /** Method that adds {@code limit} to a query based on {@code offset} and {@code size} */
@@ -441,11 +482,6 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
    * condition {@code AND}, and all subsequent {@code OR}.
    *
    * @see Prefix
-   * @see Prefix#EQ
-   * @see Prefix#NE
-   * @see Prefix#SW
-   * @see Prefix#EW
-   * @see Prefix#BW
    */
   @SuppressWarnings("java:S1854")
   private <T> Condition getCondition(final Filter<T> filter) {

@@ -82,7 +82,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "io.codefine.onequery"
             artifactId = "one-query-api"
-            version = "0.0.5"
+            version = "0.0.8"
 
             from(components["java"])
         }
