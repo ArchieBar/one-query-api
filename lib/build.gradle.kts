@@ -23,6 +23,7 @@ val postgres_version: String by project
 val junit_version: String by project
 val hikaricp_version: String by project
 val logback_version: String by project
+val jackson_version: String by project
 
 val nexusUsername: String by project
 val nexusPass: String by project
@@ -44,13 +45,14 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:$apache_commons_version")
     implementation("org.jooq:jooq:$jooq_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jackson_version")
 
     jooqCodegen("org.jooq:jooq-meta-extensions:$jooq_version")
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
     withSourcesJar()
     withJavadocJar()
