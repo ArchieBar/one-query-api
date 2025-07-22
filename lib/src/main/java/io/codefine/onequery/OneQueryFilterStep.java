@@ -10,20 +10,20 @@ import org.jooq.Record;
  * Interface allowing access to filtering methods
  *
  * @author Artur Perun
- * @version 0.0.1
+ * @version 0.0.7
  */
 public interface OneQueryFilterStep<R extends Record> extends OneQuerySortStep<R> {
   /** Method accepting {@link Filter}. The tableField must be in the format {@code [table.field]} */
   @NotNull
-  OneQuerySortStep<R> filter(@NotNull Filter filter);
+  <T> OneQuerySortStep<R> filter(@NotNull Filter<T> filter);
 
   /** Method accepting {@link Filter}. The tableField must be in the format {@code [table.field]} */
   @NotNull
-  OneQuerySortStep<R> filter(@NotNull Filter... filters);
+  OneQuerySortStep<R> filter(@NotNull Filter<?>... filters);
 
   /** Method accepting {@link Filter}. The tableField must be in the format {@code [table.field]} */
   @NotNull
-  OneQuerySortStep<R> filter(@NotNull Collection<Filter> filters);
+  OneQuerySortStep<R> filter(@NotNull Collection<Filter<?>> filters);
 
   /**
    * Adds a new condition to the query, connecting them to existing conditions with {@link

@@ -9,25 +9,22 @@ import io.codefine.onequery.OneQueryOptionalPaginationStep;
 import io.codefine.onequery.OneQueryPaginationResultStep;
 import io.codefine.onequery.OneQueryPaginationStep;
 import io.codefine.onequery.OneQuerySortStep;
-import io.codefine.onequery.configuration.OneQueryConfiguration;
-import io.codefine.onequery.mapper.OneQueryMapper;
 import io.codefine.onequery.model.Filter;
 import io.codefine.onequery.model.Page;
 import io.codefine.onequery.model.PaginationResult;
+import io.codefine.onequery.model.Prefix;
 import io.codefine.onequery.model.Sort;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import org.apache.commons.lang3.NotImplementedException;
+import org.jooq.AggregateFunction;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.OrderField;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.Result;
-import org.jooq.SQLDialect;
 import org.jooq.SelectConnectByStep;
 import org.jooq.SelectFinalStep;
 import org.jooq.SelectFromStep;
@@ -57,7 +54,7 @@ import org.jooq.impl.DSL;
  * an example jooq builder for each of the interfaces.
  *
  * @author Artur Perun, Artyom Sushchenko
- * @version 0.0.1
+ * @version 0.0.7
  */
 public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQuery<R>>
     implements OneQueryOnStep<R>,
@@ -90,24 +87,14 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
    */
   private Long total;
 
-  /**
-   * Mapper is used to get {@link TableField} objects in some methods, be automatically from {@link
-   * SQLDialect} when calling {@code .query()}
-   */
-  private OneQueryMapper mapper;
-
   /* ---------- constructors ---------------------------------------------------------------------------------------- */
 
   /**
    * Closed constructor that is called from some static methods {@code .query()}. Accepts a {@link
-   * SelectQuery} containing the jooq builder's query parameters. Gets {@link SQLDialect} from the
-   * query configuration to get the desired mapper.
+   * SelectQuery} containing the jooq builder's query parameters.
    */
   private OneQuery(final SelectQuery<R> delegate) {
     super(delegate);
-    // todo нужно проверить на NPE
-    SQLDialect dialect = Objects.requireNonNull(delegate.configuration()).dialect();
-    mapper = loadMapperByDialect(dialect);
   }
 
   /**
@@ -256,19 +243,20 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
   /* ---------- .from() --------------------------------------------------------------------------------------------- */
 
   @Override
-  public OneQueryFilterStep<R> from(final TableLike<?> table) {
+  public OneQueryFilterStep<R> from(final TableLike<R> table) {
     getDelegate().addFrom(table);
     return this;
   }
 
   @Override
-  public OneQueryFilterStep<R> from(final TableLike<?>... tables) {
+  @SafeVarargs
+  public final OneQueryFilterStep<R> from(final TableLike<R>... tables) {
     getDelegate().addFrom(tables);
     return this;
   }
 
   @Override
-  public OneQueryFilterStep<R> from(final Collection<? extends TableLike<?>> tables) {
+  public OneQueryFilterStep<R> from(final Collection<? extends TableLike<R>> tables) {
     getDelegate().addFrom(tables);
     return this;
   }
@@ -276,20 +264,49 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
   /* ---------- .filter() & .filterBy() ----------------------------------------------------------------------------- */
 
   @Override
-  public OneQuerySortStep<R> filter(final Filter filter) {
-    getDelegate().addConditions(getConditions(List.of(filter)));
+  public <T> OneQuerySortStep<R> filter(final Filter<T> filter) {
+    SelectQuery<R> delegate = getDelegate();
+    Condition condition = getCondition(filter);
+
+    if (filter.field() instanceof AggregateFunction) {
+      delegate.addHaving(condition);
+    } else {
+      delegate.addConditions(condition);
+    }
+
     return this;
   }
 
   @Override
-  public OneQuerySortStep<R> filter(final Filter... filters) {
-    getDelegate().addConditions(getConditions(List.of(filters)));
+  public OneQuerySortStep<R> filter(final Filter<?>... filters) {
+    List.of(filters)
+        .forEach(
+            filter -> {
+              SelectQuery<R> delegate = getDelegate();
+              Condition condition = getCondition(filter);
+
+              if (filter.field() instanceof AggregateFunction) {
+                delegate.addHaving(condition);
+              } else {
+                delegate.addConditions(condition);
+              }
+            });
     return this;
   }
 
   @Override
-  public OneQuerySortStep<R> filter(final Collection<Filter> filters) {
-    getDelegate().addConditions(getConditions(filters));
+  public OneQuerySortStep<R> filter(final Collection<Filter<?>> filters) {
+    filters.forEach(
+        filter -> {
+          SelectQuery<R> delegate = getDelegate();
+          Condition condition = getCondition(filter);
+
+          if (filter.field() instanceof AggregateFunction) {
+            delegate.addHaving(condition);
+          } else {
+            delegate.addConditions(condition);
+          }
+        });
     return this;
   }
 
@@ -321,13 +338,13 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
 
   @Override
   public OneQueryOptionalPaginationStep<R> sort(final Sort... sorts) {
-    getDelegate().addOrderBy(getSortFields(List.of(sorts)));
+    List.of(sorts).forEach(sort -> getDelegate().addOrderBy(getSortField(sort)));
     return this;
   }
 
   @Override
   public OneQueryOptionalPaginationStep<R> sort(final Collection<Sort> sorts) {
-    getDelegate().addOrderBy(getSortFields(sorts));
+    sorts.forEach(sort -> getDelegate().addOrderBy(getSortField(sort)));
     return this;
   }
 
@@ -413,200 +430,131 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
     getDelegate().addLimit(offset, size);
   }
 
-  /** Method for getting a mapper on a passed dialect */
-  private OneQueryMapper loadMapperByDialect(final SQLDialect dialect) {
-    return switch (dialect) {
-      case POSTGRES -> OneQueryConfiguration.getMapper(SQLDialect.POSTGRES);
-      case DEFAULT ->
-          throw new IllegalArgumentException(
-              "DEFAULT dialect is not supported. "
-                  + "You must specify the dialect to be used in the JOOQ configuration.");
-      default -> throw new NotImplementedException("Unsupported dialect: " + dialect);
-    };
-  }
-
   /* ---------- private methods filter ------------------------------------------------------------------------------ */
 
   /**
    * The method accepts the {@link Filter} collection, the implementation of the method is tied to
    * using mapper methods to get {@link TableField} and creating conditions in a loop. For each
    * individual prefix there is a different algorithm for creating a condition, so for example for
-   * the prefix {@link Filter.Prefix#BW} the odd element of the array reflects {@code from}, the
-   * even - {@code to}, and for the prefix {@link Filter.Prefix#EQ} the first element of the array
-   * adds the condition {@code AND}, and all subsequent {@code OR}.
+   * the prefix {@link Prefix#BW} the odd element of the array reflects {@code from}, the even -
+   * {@code to}, and for the prefix {@link Prefix#EQ} the first element of the array adds the
+   * condition {@code AND}, and all subsequent {@code OR}.
    *
-   * @see Filter.Prefix
-   * @see Filter.Prefix#EQ
-   * @see Filter.Prefix#NE
-   * @see Filter.Prefix#SW
-   * @see Filter.Prefix#EW
-   * @see Filter.Prefix#BD
-   * @see Filter.Prefix#BW
+   * @see Prefix
+   * @see Prefix#EQ
+   * @see Prefix#NE
+   * @see Prefix#SW
+   * @see Prefix#EW
+   * @see Prefix#BW
    */
-  private <T> List<Condition> getConditions(final Collection<Filter> filters) {
-    final List<Condition> conditions = new ArrayList<>();
-
-    for (Filter filter : filters) {
-      if (filter.tableField() == null) {
-        throw new IllegalStateException("Table field must not be null");
-      }
-
-      TableField<R, T> tableFiled = mapper.getTableField(filter.tableField());
-      Filter.Prefix prefix = filter.prefix();
-      String[] value = filter.values();
-
-      if (prefix == null) {
-        throw new IllegalStateException("Prefix must not be null");
-      }
-
-      if (value == null) {
-        throw new IllegalStateException("Value must not be null");
-      }
-
-      switch (prefix) {
-        case BD -> conditions.add(getBetweenDateCondition(tableFiled, value));
-        case BW -> conditions.add(getBetweenCondition(tableFiled, value));
-        case EQ -> conditions.add(getEqualsCondition(tableFiled, value));
-        case NE -> conditions.add(getNotEqualsCondition(tableFiled, value));
-        case SW -> conditions.add(getStartsWithCondition(tableFiled, value));
-        case EW -> conditions.add(getEndsWithCondition(tableFiled, value));
-        case IS_NULL -> conditions.add(getEqualsNullCondition(tableFiled));
-        case IS_NOT_NULL -> conditions.add(getNotEqualsNullCondition(tableFiled));
-      }
+  @SuppressWarnings("java:S1854")
+  private <T> Condition getCondition(final Filter<T> filter) {
+    if (filter.field() == null) {
+      throw new IllegalStateException("Table field must not be null");
     }
-    return conditions;
+
+    if (filter.prefix() == null) {
+      throw new IllegalStateException("Prefix must not be null");
+    }
+
+    if (filter.values() == null) {
+      throw new IllegalStateException("Value must not be null");
+    }
+
+    Field<T> field = filter.field();
+    Prefix prefix = filter.prefix();
+    List<T> value = List.copyOf(filter.values());
+
+    return switch (prefix) {
+      case BW -> getBetweenCondition(field, value);
+      case EQ -> getEqualsCondition(field, value);
+      case NE -> getNotEqualsCondition(field, value);
+      case SW -> getStartsWithCondition(field, value);
+      case EW -> getEndsWithCondition(field, value);
+      case IS_NULL -> getEqualsNullCondition(field);
+      case IS_NOT_NULL -> getNotEqualsNullCondition(field);
+    };
   }
 
   /**
-   * @see Filter.Prefix#BD
+   * @see Prefix#BW
    */
-  // todo Возможно проблема с форматом даты
-  @SuppressWarnings("unchecked")
-  private <T> Condition getBetweenDateCondition(
-      final TableField<R, T> tableFiled, final String[] conditionValue) {
-    if (conditionValue.length % 2 != 0) {
-      throw new IllegalArgumentException(
-          String.format(
-              "Conditions must be a multiple of 2. Values size: [%s]", conditionValue.length));
-    }
-    Condition condition =
-        tableFiled.between(
-            (T) OffsetDateTime.parse(conditionValue[0]),
-            (T) OffsetDateTime.parse(conditionValue[1]));
-    for (int i = 2; i < conditionValue.length; i += 2) {
-      condition =
-          condition.or(
-              tableFiled.between(
-                  (T) OffsetDateTime.parse(conditionValue[i]),
-                  (T) OffsetDateTime.parse(conditionValue[i + 1])));
-    }
-    return condition;
-  }
-
-  /**
-   * @see Filter.Prefix#BW
-   */
-  @SuppressWarnings("unchecked")
   private <T> Condition getBetweenCondition(
-      final TableField<R, T> tableFiled, final String[] conditionValue) {
-    if (conditionValue.length % 2 != 0) {
+      final Field<T> tableFiled, final List<T> conditionValue) {
+    if (conditionValue.size() % 2 != 0) {
       throw new IllegalArgumentException(
           String.format(
-              "Conditions must be a multiple of 2. Values size: [%s]", conditionValue.length));
+              "Conditions must be a multiple of 2. Values size: [%s]", conditionValue.size()));
     }
-    Condition condition = tableFiled.between((T) conditionValue[0], (T) conditionValue[1]);
-    for (int i = 2; i < conditionValue.length; i += 2) {
+    Condition condition = tableFiled.between(conditionValue.getFirst(), conditionValue.get(1));
+    for (int i = 2; i < conditionValue.size(); i += 2) {
       condition =
-          condition.or(tableFiled.between((T) conditionValue[i], (T) conditionValue[i + 1]));
+          condition.or(tableFiled.between(conditionValue.get(i), conditionValue.get(i + 1)));
     }
     return condition;
   }
 
   /**
-   * @see Filter.Prefix#EQ
+   * @see Prefix#EQ
    */
-  @SuppressWarnings("unchecked")
   private <T> Condition getEqualsCondition(
-      final TableField<R, T> tableFiled, final String[] conditionValue) {
-    Condition condition = tableFiled.eq((T) conditionValue[0]);
-    for (int i = 1; i < conditionValue.length; i++) {
-      condition = condition.or(tableFiled.eq((T) conditionValue[i]));
+      final Field<T> tableFiled, final List<T> conditionValue) {
+    Condition condition = tableFiled.eq((conditionValue.getFirst()));
+    for (int i = 1; i < conditionValue.size(); i++) {
+      condition = condition.or(tableFiled.eq(conditionValue.get(i)));
     }
     return condition;
   }
 
   /**
-   * @see Filter.Prefix#NE
+   * @see Prefix#NE
    */
-  @SuppressWarnings("unchecked")
   private <T> Condition getNotEqualsCondition(
-      final TableField<R, T> tableFiled, final String[] conditionValue) {
-    Condition condition = tableFiled.ne((T) conditionValue[0]);
-    for (int i = 1; i < conditionValue.length; i++) {
-      condition = condition.and(tableFiled.ne((T) conditionValue[i]));
+      final Field<T> tableFiled, final List<T> conditionValue) {
+    Condition condition = tableFiled.ne(conditionValue.getFirst());
+    for (int i = 1; i < conditionValue.size(); i++) {
+      condition = condition.and(tableFiled.ne(conditionValue.get(i)));
     }
     return condition;
   }
 
   /**
-   * @see Filter.Prefix#SW
+   * @see Prefix#SW
    */
-  @SuppressWarnings("unchecked")
   private <T> Condition getStartsWithCondition(
-      final TableField<R, T> tableFiled, final String[] conditionValue) {
-    Condition condition = tableFiled.startsWith((T) conditionValue[0]);
-    for (int i = 1; i < conditionValue.length; i++) {
-      condition = condition.or(tableFiled.startsWith((T) conditionValue[i]));
+      final Field<T> tableFiled, final List<T> conditionValue) {
+    Condition condition = tableFiled.startsWith(conditionValue.getFirst());
+    for (int i = 1; i < conditionValue.size(); i++) {
+      condition = condition.or(tableFiled.startsWith(conditionValue.get(i)));
     }
     return condition;
   }
 
   /**
-   * @see Filter.Prefix#EW
+   * @see Prefix#EW
    */
-  @SuppressWarnings("unchecked")
   private <T> Condition getEndsWithCondition(
-      final TableField<R, T> tableFiled, final String[] conditionValue) {
-    Condition condition = tableFiled.endsWith((T) conditionValue[0]);
-    for (int i = 1; i < conditionValue.length; i++) {
-      condition = condition.or(tableFiled.endsWith((T) conditionValue[i]));
+      final Field<T> tableFiled, final List<T> conditionValue) {
+    Condition condition = tableFiled.endsWith(conditionValue.getFirst());
+    for (int i = 1; i < conditionValue.size(); i++) {
+      condition = condition.or(tableFiled.endsWith(conditionValue.get(i)));
     }
     return condition;
   }
 
-  private <T> Condition getEqualsNullCondition(final TableField<R, T> tableFiled) {
+  private <T> Condition getEqualsNullCondition(final Field<T> tableFiled) {
     return tableFiled.isNull();
   }
 
-  private <T> Condition getNotEqualsNullCondition(final TableField<R, T> tableFiled) {
+  private <T> Condition getNotEqualsNullCondition(final Field<T> tableFiled) {
     return tableFiled.isNotNull();
   }
 
   /* ---------- private methods sort -------------------------------------------------------------------------------- */
 
-  /**
-   * Method to get the sort field, gets {@link TableField} using the mapper implementation and
-   * transforms it depending on the sort direction from {@link Sort}
-   */
-  private <T> Collection<SortField<T>> getSortFields(final Collection<Sort> sorting) {
-    Collection<SortField<T>> querySortFields = new ArrayList<>();
-
-    if (sorting == null) {
-      return querySortFields;
-    }
-
-    for (Sort sort : sorting) {
-      SortField<T> querySortField = getSortField(sort);
-      querySortFields.add(querySortField);
-    }
-
-    return querySortFields;
-  }
-
-  private <T> SortField<T> getSortField(final Sort sort) {
-    String sortFieldName = sort.field();
-    Sort.Direction sortDirection = sort.direction();
-    TableField<R, T> tableField = mapper.getTableField(sortFieldName);
-    return Sort.Direction.ASC.equals(sortDirection) ? tableField.asc() : tableField.desc();
+  /** Creates a {@link SortField} from a {@link Sort} object */
+  private SortField<?> getSortField(final Sort sort) {
+    if (sort == null) return null;
+    return sort.field().sort(sort.sortOrder());
   }
 }

@@ -21,13 +21,13 @@ import org.jooq.TableLike;
 public interface OneQueryFromStep<R extends Record> {
   /** Add a <code>FROM</code> clause to the query. */
   @NotNull
-  OneQueryFilterStep<R> from(TableLike<?> table);
+  OneQueryFilterStep<R> from(TableLike<R> table);
 
   /** Add a <code>FROM</code> clause to the query. */
   @NotNull
-  OneQueryFilterStep<R> from(TableLike<?>... tables);
+  OneQueryFilterStep<R> from(TableLike<R>... tables);
 
   /** Add a <code>FROM</code> clause to the query. */
   @NotNull
-  OneQueryFilterStep<R> from(Collection<? extends TableLike<?>> tables);
+  OneQueryFilterStep<R> from(Collection<? extends TableLike<R>> tables);
 }
