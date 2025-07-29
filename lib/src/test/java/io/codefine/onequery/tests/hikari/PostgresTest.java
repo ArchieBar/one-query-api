@@ -1,7 +1,9 @@
 package io.codefine.onequery.tests.hikari;
 
 import static io.codefine.onequery.configuration.FieldConfig.C_CNAME;
+import static io.codefine.onequery.configuration.FieldConfig.C_CONTACT_NAME;
 import static io.codefine.onequery.configuration.FieldConfig.C_ID;
+import static io.codefine.onequery.jooq.generated.demo_schema.Tables.CUSTOMERS;
 import static io.codefine.onequery.jooq.generated.demo_schema.Tables.SHIPPERS;
 import static io.codefine.onequery.model.Prefix.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import io.codefine.onequery.AbstractIsolatedEnvironment;
 import io.codefine.onequery.configuration.FieldConfig;
 import io.codefine.onequery.impl.OneQuery;
-import io.codefine.onequery.jooq.generated.demo_schema.Tables;
 import io.codefine.onequery.jooq.generated.demo_schema.tables.records.CustomersRecord;
 import io.codefine.onequery.model.Filter;
 import io.codefine.onequery.model.Page;
@@ -36,7 +37,7 @@ class PostgresTest extends AbstractIsolatedEnvironment {
     Sort sort = mapper.createSort(C_ID.getKey(), DESC);
     Page page = new Page(0, 2);
     PaginationResult<CustomersRecord> result =
-        OneQuery.query(ctx.selectFrom(Tables.CUSTOMERS))
+        OneQuery.query(ctx.selectFrom(CUSTOMERS))
             .filter(filter)
             .sort(sort)
             .paginate(page)
@@ -81,5 +82,48 @@ class PostgresTest extends AbstractIsolatedEnvironment {
 
     assertThat(total).isNotNull().isEqualTo(3);
     assertThat(res).isNotEmpty().hasSize(2);
+  }
+
+  @Test
+  @DisplayName("Like prefix test")
+  void test5() {
+    var filter = mapper.createFilter(C_CONTACT_NAME.getKey(), LIKE, List.of("Maria Anders"));
+    var result =
+        OneQuery.query(ctx.select(CUSTOMERS.CONTACTNAME).from(CUSTOMERS)).filter(filter).fetch();
+
+    assertThat(result).hasSize(1).first().matches(row -> row.component1().equals("Maria Anders"));
+
+    filter = mapper.createFilter(C_CONTACT_NAME.getKey(), LIKE, List.of("Maria"));
+    result =
+        OneQuery.query(ctx.select(CUSTOMERS.CONTACTNAME).from(CUSTOMERS)).filter(filter).fetch();
+
+    assertThat(result)
+        .hasSize(2)
+        .anyMatch(row -> row.component1().equals("Maria Anders"))
+        .anyMatch(row -> row.component1().equals("Maria Larsson"));
+
+    filter = mapper.createFilter(C_CONTACT_NAME.getKey(), LIKE, List.of("Anders"));
+    result =
+        OneQuery.query(ctx.select(CUSTOMERS.CONTACTNAME).from(CUSTOMERS)).filter(filter).fetch();
+
+    assertThat(result).hasSize(1).first().matches(row -> row.component1().equals("Maria Anders"));
+
+    filter = mapper.createFilter(C_CONTACT_NAME.getKey(), LIKE, List.of("ia An"));
+    result =
+        OneQuery.query(ctx.select(CUSTOMERS.CONTACTNAME).from(CUSTOMERS)).filter(filter).fetch();
+
+    assertThat(result).hasSize(1).first().matches(row -> row.component1().equals("Maria Anders"));
+
+    filter = mapper.createFilter(C_CONTACT_NAME.getKey(), LIKE, List.of("anders"));
+    result =
+        OneQuery.query(ctx.select(CUSTOMERS.CONTACTNAME).from(CUSTOMERS)).filter(filter).fetch();
+
+    assertThat(result).hasSize(1).first().matches(row -> row.component1().equals("Maria Anders"));
+
+    filter = mapper.createFilter(C_CONTACT_NAME.getKey(), LIKE, List.of("maria anders"));
+    result =
+        OneQuery.query(ctx.select(CUSTOMERS.CONTACTNAME).from(CUSTOMERS)).filter(filter).fetch();
+
+    assertThat(result).hasSize(1).first().matches(row -> row.component1().equals("Maria Anders"));
   }
 }

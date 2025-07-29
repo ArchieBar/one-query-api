@@ -25,9 +25,6 @@ val hikaricp_version: String by project
 val logback_version: String by project
 val jackson_version: String by project
 
-val nexusUsername: String by project
-val nexusPass: String by project
-
 dependencies {
     testImplementation("org.assertj:assertj-core:$assertj_version")
     testImplementation("org.testcontainers:junit-jupiter:$testcontainers_version")
@@ -82,7 +79,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "io.codefine.onequery"
             artifactId = "one-query-api"
-            version = "0.0.8"
+            version = "0.0.9"
 
             from(components["java"])
         }

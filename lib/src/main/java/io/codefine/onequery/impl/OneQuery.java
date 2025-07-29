@@ -11,7 +11,6 @@ import io.codefine.onequery.OneQueryOptionalPaginationStep;
 import io.codefine.onequery.OneQueryPaginationResultStep;
 import io.codefine.onequery.OneQueryPaginationStep;
 import io.codefine.onequery.OneQuerySortStep;
-import io.codefine.onequery.mapper.OneQueryMapper;
 import io.codefine.onequery.model.Filter;
 import io.codefine.onequery.model.Page;
 import io.codefine.onequery.model.PaginationResult;
@@ -19,6 +18,7 @@ import io.codefine.onequery.model.Prefix;
 import io.codefine.onequery.model.Sort;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jooq.AggregateFunction;
 import org.jooq.CommonTableExpression;
@@ -98,12 +98,6 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
    * OneQueryFieldsStep#fields(String...)}
    */
   private String[] fields;
-
-  /**
-   * Mapper is used to get {@link TableField} objects in some methods, be automatically from {@link
-   * org.jooq.SQLDialect} when calling {@code .query()}
-   */
-  private OneQueryMapper mapper;
 
   /* ---------- constructors ---------------------------------------------------------------------------------------- */
 
@@ -507,6 +501,7 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
       case NE -> getNotEqualsCondition(field, value);
       case SW -> getStartsWithCondition(field, value);
       case EW -> getEndsWithCondition(field, value);
+      case LIKE -> getLikeCondition(field, value);
       case IS_NULL -> getEqualsNullCondition(field);
       case IS_NOT_NULL -> getNotEqualsNullCondition(field);
     };
@@ -515,17 +510,15 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
   /**
    * @see Prefix#BW
    */
-  private <T> Condition getBetweenCondition(
-      final Field<T> tableFiled, final List<T> conditionValue) {
+  private <T> Condition getBetweenCondition(final Field<T> field, final List<T> conditionValue) {
     if (conditionValue.size() % 2 != 0) {
       throw new IllegalArgumentException(
           String.format(
               "Conditions must be a multiple of 2. Values size: [%s]", conditionValue.size()));
     }
-    Condition condition = tableFiled.between(conditionValue.getFirst(), conditionValue.get(1));
+    Condition condition = field.between(conditionValue.getFirst(), conditionValue.get(1));
     for (int i = 2; i < conditionValue.size(); i += 2) {
-      condition =
-          condition.or(tableFiled.between(conditionValue.get(i), conditionValue.get(i + 1)));
+      condition = condition.or(field.between(conditionValue.get(i), conditionValue.get(i + 1)));
     }
     return condition;
   }
@@ -533,11 +526,10 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
   /**
    * @see Prefix#EQ
    */
-  private <T> Condition getEqualsCondition(
-      final Field<T> tableFiled, final List<T> conditionValue) {
-    Condition condition = tableFiled.eq((conditionValue.getFirst()));
+  private <T> Condition getEqualsCondition(final Field<T> field, final List<T> conditionValue) {
+    Condition condition = field.eq((conditionValue.getFirst()));
     for (int i = 1; i < conditionValue.size(); i++) {
-      condition = condition.or(tableFiled.eq(conditionValue.get(i)));
+      condition = condition.or(field.eq(conditionValue.get(i)));
     }
     return condition;
   }
@@ -545,11 +537,10 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
   /**
    * @see Prefix#NE
    */
-  private <T> Condition getNotEqualsCondition(
-      final Field<T> tableFiled, final List<T> conditionValue) {
-    Condition condition = tableFiled.ne(conditionValue.getFirst());
+  private <T> Condition getNotEqualsCondition(final Field<T> field, final List<T> conditionValue) {
+    Condition condition = field.ne(conditionValue.getFirst());
     for (int i = 1; i < conditionValue.size(); i++) {
-      condition = condition.and(tableFiled.ne(conditionValue.get(i)));
+      condition = condition.and(field.ne(conditionValue.get(i)));
     }
     return condition;
   }
@@ -557,11 +548,10 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
   /**
    * @see Prefix#SW
    */
-  private <T> Condition getStartsWithCondition(
-      final Field<T> tableFiled, final List<T> conditionValue) {
-    Condition condition = tableFiled.startsWith(conditionValue.getFirst());
+  private <T> Condition getStartsWithCondition(final Field<T> field, final List<T> conditionValue) {
+    Condition condition = field.startsWith(conditionValue.getFirst());
     for (int i = 1; i < conditionValue.size(); i++) {
-      condition = condition.or(tableFiled.startsWith(conditionValue.get(i)));
+      condition = condition.or(field.startsWith(conditionValue.get(i)));
     }
     return condition;
   }
@@ -569,21 +559,39 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
   /**
    * @see Prefix#EW
    */
-  private <T> Condition getEndsWithCondition(
-      final Field<T> tableFiled, final List<T> conditionValue) {
-    Condition condition = tableFiled.endsWith(conditionValue.getFirst());
+  private <T> Condition getEndsWithCondition(final Field<T> field, final List<T> conditionValue) {
+    Condition condition = field.endsWith(conditionValue.getFirst());
     for (int i = 1; i < conditionValue.size(); i++) {
-      condition = condition.or(tableFiled.endsWith(conditionValue.get(i)));
+      condition = condition.or(field.endsWith(conditionValue.get(i)));
     }
     return condition;
   }
 
-  private <T> Condition getEqualsNullCondition(final Field<T> tableFiled) {
-    return tableFiled.isNull();
+  private <T> Condition getLikeCondition(final Field<T> field, final List<T> conditionValue) {
+    if (field.getType() != String.class) {
+      throw new IllegalArgumentException("Field must be of type String");
+    }
+
+    @SuppressWarnings("unchecked")
+    Field<String> stringField = (Field<String>) field;
+
+    List<String> patterns =
+        conditionValue.stream().filter(Objects::nonNull).map(value -> "%" + value + "%").toList();
+
+    Condition condition = DSL.noCondition();
+    for (String pattern : patterns) {
+      condition = condition.or(stringField.likeIgnoreCase(pattern));
+    }
+
+    return condition;
   }
 
-  private <T> Condition getNotEqualsNullCondition(final Field<T> tableFiled) {
-    return tableFiled.isNotNull();
+  private <T> Condition getEqualsNullCondition(final Field<T> field) {
+    return field.isNull();
+  }
+
+  private <T> Condition getNotEqualsNullCondition(final Field<T> field) {
+    return field.isNotNull();
   }
 
   /* ---------- private methods sort -------------------------------------------------------------------------------- */

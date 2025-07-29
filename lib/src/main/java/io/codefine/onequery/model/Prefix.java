@@ -57,6 +57,19 @@ public enum Prefix {
   EW(4, "ends with"),
 
   /**
+   * {@code Like} represents the equality of two fields, the field that is passed as {@code
+   * tableField} must end with the passed value. The first element in the array will be treated as
+   * {@code AND}, all subsequent values will be treated as {@code OR}
+   *
+   * <p>Incoming value example: {@code EW : [1, 2, ...N]}, example of a heralded value: {@code field
+   * like %1% or field like %2% or ... field like %N%}
+   *
+   * <p><b>Important</b>, the above is relevant to the implementation of getting conditions in
+   * {@link OneQuery}
+   */
+  LIKE(5, "like"),
+
+  /**
    * {@code Between} represents the equality of two fields, the field passed as {@code tableField}
    * must be between the two values passed. The first pair of values will be considered where an
    * even element has a {@code from} relationship and an odd element has a {@code to} relationship.
@@ -68,7 +81,7 @@ public enum Prefix {
    * <p><b>Important</b>, the above is relevant to the implementation of getting conditions in
    * {@link OneQuery}
    */
-  BW(5, "between"),
+  BW(6, "between"),
 
   /**
    * {@code Equals} represents the equality of two fields, the field that is passed as {@code
@@ -77,7 +90,7 @@ public enum Prefix {
    * <p><b>Important</b>, the above is relevant to the implementation of getting conditions in
    * {@link OneQuery}
    */
-  IS_NULL(6, "is null"),
+  IS_NULL(7, "is null"),
 
   /**
    * {@code Equals} represents the equality of two fields, the field that is passed as {@code
@@ -86,7 +99,7 @@ public enum Prefix {
    * <p><b>Important</b>, the above is relevant to the implementation of getting conditions in
    * {@link OneQuery}
    */
-  IS_NOT_NULL(7, "is not null");
+  IS_NOT_NULL(8, "is not null");
 
   Prefix(int id, String name) {
     this.id = id;

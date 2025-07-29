@@ -12,6 +12,7 @@ import org.jooq.Field;
 public enum FieldConfig {
   C_ID("CId", CUSTOMERS.CUSTOMERID),
   C_CNAME("CCname", CUSTOMERS.CUSTOMERNAME),
+  C_CONTACT_NAME("CContactName", CUSTOMERS.CONTACTNAME),
   P_PRICE("PPrice", PRODUCTS.PRICE),
   S_SNAME("SSName", SHIPPERS.SHIPPERNAME);
 
