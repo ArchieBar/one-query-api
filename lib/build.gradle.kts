@@ -77,20 +77,11 @@ tasks.named<Test>("test") {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "io.codefine.onequery"
+            groupId = "one.query.api"
             artifactId = "one-query-api"
             version = "0.0.9"
 
             from(components["java"])
-        }
-
-        repositories {
-            maven {
-                name = "codefine"
-                isAllowInsecureProtocol = true
-                url = uri("http://10.129.0.9:8081/repository/maven-releases")
-                credentials(PasswordCredentials::class)
-            }
         }
     }
 }
@@ -105,7 +96,7 @@ jooq {
             }
 
             target {
-                packageName = "io.codefine.onequery.jooq.generated"
+                packageName = "one.query.api.jooq.generated"
                 directory = "src/test/java"
             }
 

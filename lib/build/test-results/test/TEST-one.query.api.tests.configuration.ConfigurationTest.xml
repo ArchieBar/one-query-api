@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="one.query.api.tests.configuration.ConfigurationTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-10-22T15:05:11" hostname="artur-desktop" time="0.616">
+  <properties/>
+  <testcase name="Register mapper without dialect in params" classname="one.query.api.tests.configuration.ConfigurationTest" time="0.605"/>
+  <testcase name="Register mapper with default dialect" classname="one.query.api.tests.configuration.ConfigurationTest" time="0.001"/>
+  <testcase name="Registered array mappers" classname="one.query.api.tests.configuration.ConfigurationTest" time="0.001"/>
+  <testcase name="Registered collection mappers" classname="one.query.api.tests.configuration.ConfigurationTest" time="0.0"/>
+  <testcase name="Not such mapper exception" classname="one.query.api.tests.configuration.ConfigurationTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J(I): Connected with provider of type [ch.qos.logback.classic.spi.LogbackServiceProvider]
+]]></system-err>
+</testsuite>

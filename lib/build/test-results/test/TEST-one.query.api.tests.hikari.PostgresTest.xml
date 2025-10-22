@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="one.query.api.tests.hikari.PostgresTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2025-10-22T15:05:20" hostname="artur-desktop" time="0.114">
+  <properties/>
+  <testcase name="Base test" classname="one.query.api.tests.hikari.PostgresTest" time="0.063"/>
+  <testcase name="Cast error exception" classname="one.query.api.tests.hikari.PostgresTest" time="0.03"/>
+  <testcase name="Test CTE" classname="one.query.api.tests.hikari.PostgresTest" time="0.011"/>
+  <testcase name="Like prefix test" classname="one.query.api.tests.hikari.PostgresTest" time="0.01"/>
+  <system-out><![CDATA[18:05:20.595 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+18:05:20.604 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@2b0f5318
+18:05:20.604 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+18:05:20.679 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+18:05:20.680 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

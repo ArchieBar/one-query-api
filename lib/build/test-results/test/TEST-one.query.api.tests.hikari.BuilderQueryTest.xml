@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="one.query.api.tests.hikari.BuilderQueryTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2025-10-22T15:05:16" hostname="artur-desktop" time="0.351">
+  <properties/>
+  <testcase name="On step builder test (Condition)" classname="one.query.api.tests.hikari.BuilderQueryTest" time="0.315"/>
+  <testcase name="On step builder test (Condition...)" classname="one.query.api.tests.hikari.BuilderQueryTest" time="0.013"/>
+  <testcase name="Into step builder test" classname="one.query.api.tests.hikari.BuilderQueryTest" time="0.002"/>
+  <testcase name="Into step builder test" classname="one.query.api.tests.hikari.BuilderQueryTest" time="0.006"/>
+  <testcase name="Into step builder test" classname="one.query.api.tests.hikari.BuilderQueryTest" time="0.003"/>
+  <testcase name="Final step builder test" classname="one.query.api.tests.hikari.BuilderQueryTest" time="0.007"/>
+  <testcase name="Connect step builder test" classname="one.query.api.tests.hikari.BuilderQueryTest" time="0.002"/>
+  <testcase name="Optional on step builder test" classname="one.query.api.tests.hikari.BuilderQueryTest" time="0.001"/>
+  <testcase name="From step builder test" classname="one.query.api.tests.hikari.BuilderQueryTest" time="0.0"/>
+  <system-out><![CDATA[18:05:16.935 [Test worker] INFO  org.jooq.Constants - 
+                                      
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@  @@        @@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@        @@@@@@@@@@
+@@@@@@@@@@@@@@@@  @@  @@    @@@@@@@@@@
+@@@@@@@@@@  @@@@  @@  @@    @@@@@@@@@@
+@@@@@@@@@@        @@        @@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@        @@        @@@@@@@@@@
+@@@@@@@@@@    @@  @@  @@@@  @@@@@@@@@@
+@@@@@@@@@@    @@  @@  @@@@  @@@@@@@@@@
+@@@@@@@@@@        @@  @  @  @@@@@@@@@@
+@@@@@@@@@@        @@        @@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  Thank you for using jOOQ 3.19.6 (Build date: 2024-03-08T10:59:32Z)
+                                      
+18:05:16.937 [Test worker] INFO  org.jooq.Constants - 
+
+jOOQ tip of the day: When plain SQL templating is not enough, you can write dialect agnostic CustomQueryPart implementations: https://www.jooq.org/doc/latest/manual/sql-building/queryparts/custom-queryparts/
+
+18:05:16.964 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+18:05:17.000 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@e53691
+18:05:17.002 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+18:05:17.012 [Test worker] INFO  o.j.i.D.logVersionSupport - Version                  : Database version is supported by dialect POSTGRES: 16.2
+18:05:17.086 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+18:05:17.087 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
