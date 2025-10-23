@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class QueryPaginateTest extends AbstractIsolatedEnvironment {
   @Test
   @DisplayName("Paginate test (Page)")
-  void test1() {
+  void test1_1() {
     var page = new Page(0, 5);
     var res =
         OneQuery.query(ctx.selectFrom(CATEGORIES))
@@ -28,7 +28,7 @@ class QueryPaginateTest extends AbstractIsolatedEnvironment {
 
   @Test
   @DisplayName("Paginate test (int, int)")
-  void test2() {
+  void test1_2() {
     var res =
         OneQuery.query(ctx.selectFrom(CATEGORIES))
             .paginate(0, 5)
@@ -42,7 +42,7 @@ class QueryPaginateTest extends AbstractIsolatedEnvironment {
 
   @Test
   @DisplayName("Paginate test .getTotal()")
-  void test3() {
+  void test2() {
     var res = OneQuery.query(ctx.selectFrom(CATEGORIES)).paginate(0, 5).getTotal();
 
     assertThat(res).isEqualTo(8);

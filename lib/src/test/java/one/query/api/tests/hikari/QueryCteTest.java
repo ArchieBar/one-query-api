@@ -5,10 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import one.query.api.AbstractIsolatedEnvironment;
 import one.query.api.impl.OneQuery;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class QueryCteTest extends AbstractIsolatedEnvironment {
   @Test
+  @DisplayName("Cte fields test")
   void test1() {
     var fieldName = "custom_name";
     var res =
