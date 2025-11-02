@@ -22,7 +22,7 @@ import one.query.api.model.Sort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class PostgresTest extends AbstractIsolatedEnvironment {
+class UserCaseTest extends AbstractIsolatedEnvironment {
   @Test
   @DisplayName("Base test")
   void test1() {

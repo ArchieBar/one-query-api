@@ -2,6 +2,7 @@ package one.query.api.tests.hikari;
 
 import static one.query.api.jooq.generated.demo_schema.Tables.CATEGORIES;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import one.query.api.AbstractIsolatedEnvironment;
 import one.query.api.impl.OneQuery;
@@ -46,5 +47,17 @@ class QueryPaginateTest extends AbstractIsolatedEnvironment {
     var res = OneQuery.query(ctx.selectFrom(CATEGORIES)).paginate(0, 5).getTotal();
 
     assertThat(res).isEqualTo(8);
+  }
+
+  @Test
+  @DisplayName("Try create invalid page, number is less 0")
+  void test3_1() {
+    assertThrows(IllegalArgumentException.class, () -> new Page(-1, 5));
+  }
+
+  @Test
+  @DisplayName("Try create invalid page, size is less 1")
+  void test3_2() {
+    assertThrows(IllegalArgumentException.class, () -> new Page(0, 0));
   }
 }

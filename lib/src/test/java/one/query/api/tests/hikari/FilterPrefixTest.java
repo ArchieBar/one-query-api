@@ -103,4 +103,16 @@ class FilterPrefixTest extends AbstractIsolatedEnvironment {
     var query = OneQuery.query(ctx.selectFrom(PRODUCTS));
     assertThrows(IllegalArgumentException.class, () -> query.filter(filter));
   }
+
+  @Test
+  @DisplayName("Get id prefix")
+  void test3() {
+    assertThat(Prefix.EQ.getId()).isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("Get name prefix")
+  void test4() {
+    assertThat(Prefix.EQ.getName()).isEqualTo("equals");
+  }
 }

@@ -14,6 +14,8 @@ public enum FieldConfig {
   C_CNAME("CCname", CUSTOMERS.CUSTOMERNAME),
   C_CONTACT_NAME("CContactName", CUSTOMERS.CONTACTNAME),
   P_PRICE("PPrice", PRODUCTS.PRICE),
+  P_ID("PId", PRODUCTS.PRODUCTID),
+  P_CATEGORY_ID("PCId", PRODUCTS.CATEGORYID),
   S_SNAME("SSName", SHIPPERS.SHIPPERNAME);
 
   FieldConfig(final String key, final Field<?> field) {

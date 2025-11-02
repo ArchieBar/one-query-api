@@ -91,7 +91,17 @@ class ConfigurationTest {
     assertThat(ex).isNotNull();
   }
 
-  class TestMapper extends AbstractOneQueryMapper {
+  @Test
+  @DisplayName("Register mapper by another sql dialect")
+  void test6() {
+    var mapper = new PostgresMapper(new ObjectMapper(), FieldConfig.collectMap());
+    mapper.register(SQLDialect.DEFAULT);
+
+    var registeredMapper = OneQueryConfiguration.getMapper(SQLDialect.DEFAULT);
+    assertThat(registeredMapper).isEqualTo(mapper);
+  }
+
+  static class TestMapper extends AbstractOneQueryMapper {
     public TestMapper() {
       super(new ObjectMapper(), new HashMap<>());
     }
