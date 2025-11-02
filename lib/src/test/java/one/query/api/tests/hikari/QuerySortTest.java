@@ -2,6 +2,7 @@ package one.query.api.tests.hikari;
 
 import static one.query.api.jooq.generated.demo_schema.Tables.PRODUCTS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import one.query.api.AbstractIsolatedEnvironment;
@@ -137,5 +138,13 @@ class QuerySortTest extends AbstractIsolatedEnvironment {
     assertThat(res.getLast())
         .matches(pr -> pr.getProductid().equals(1))
         .matches(pr -> pr.getCategoryid().equals(1));
+  }
+
+  @Test
+  @DisplayName("Sort is null")
+  void test3() {
+    Sort sort = null;
+    var query = OneQuery.query(ctx.selectFrom(PRODUCTS));
+    assertThrows(IllegalArgumentException.class, () -> query.sort(sort));
   }
 }

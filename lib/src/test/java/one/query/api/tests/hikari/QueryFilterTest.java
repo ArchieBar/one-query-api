@@ -3,6 +3,7 @@ package one.query.api.tests.hikari;
 import static one.query.api.jooq.generated.demo_schema.Tables.PRODUCTS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jooq.impl.DSL.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -167,5 +168,29 @@ class QueryFilterTest extends AbstractIsolatedEnvironment {
         .isNotEmpty()
         .allMatch(r -> r.getProductname().equals("Chais"))
         .allMatch(r -> r.getProductid().equals(1));
+  }
+
+  @Test
+  @DisplayName("Filter field is null")
+  void test4_1() {
+    var filter = new Filter<>(null, Prefix.EQ, List.of("Chais"));
+    var query = OneQuery.query(ctx.selectFrom(PRODUCTS));
+    assertThrows(IllegalStateException.class, () -> query.filter(filter));
+  }
+
+  @Test
+  @DisplayName("Filter prefix is null")
+  void test4_2() {
+    var filter = new Filter<>(PRODUCTS.PRODUCTNAME, null, List.of("Chais"));
+    var query = OneQuery.query(ctx.selectFrom(PRODUCTS));
+    assertThrows(IllegalStateException.class, () -> query.filter(filter));
+  }
+
+  @Test
+  @DisplayName("Filter values is null")
+  void test4_3() {
+    var filter = new Filter<>(PRODUCTS.PRODUCTNAME, Prefix.EQ, null);
+    var query = OneQuery.query(ctx.selectFrom(PRODUCTS));
+    assertThrows(IllegalStateException.class, () -> query.filter(filter));
   }
 }

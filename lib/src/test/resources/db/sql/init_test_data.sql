@@ -337,7 +337,7 @@ INSERT INTO Products VALUES(73,'Röd Kaviar',17,8,'24 - 150 g jars',15);
 INSERT INTO Products VALUES(74,'Longlife Tofu',4,7,'5 kg pkg.',10);
 INSERT INTO Products VALUES(75,'Rhönbräu Klosterbier',12,1,'24 - 0.5 l bottles',7.75);
 INSERT INTO Products VALUES(76,'Lakkalikööri',23,1,'500 ml',18);
-INSERT INTO Products VALUES(77,'Original Frankfurter grüne Soße',12,2,'12 boxes',13);
+INSERT INTO Products VALUES(77,'Original Frankfurter grüne Soße',12,2,'12 boxes');
 
 INSERT INTO Orders VALUES(10248,90,5,'1996-07-04',3);
 INSERT INTO Orders VALUES(10249,81,6,'1996-07-05',1);

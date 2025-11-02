@@ -445,9 +445,6 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
 
   @Override
   public CommonTableExpression<R> toCommonTable(final String name) {
-    if (fields.length == 0) {
-      return DSL.name(name).as(getDelegate());
-    }
     return DSL.name(name).fields(fields).as(getDelegate());
   }
 
@@ -591,7 +588,7 @@ public final class OneQuery<R extends Record> extends AbstractOneQuery<SelectQue
 
   /** Creates a {@link SortField} from a {@link Sort} object */
   private SortField<?> getSortField(final Sort sort) {
-    if (sort == null) return null;
+    if (sort == null) throw new IllegalArgumentException("Not supported sorted by null sort field");
     return sort.field().sort(sort.sortOrder());
   }
 }
