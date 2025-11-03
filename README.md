@@ -75,7 +75,7 @@ PaginationResult<CustomersRecord> result =
         .toPaginationResult(CustomersRecord.class);
 ```
 
-### Подключение CTE и выбор колонок
+### Подключение CTE
 ```java
 OneQueryCommonTableStep<Record2<Integer, String>> tmp =
     OneQuery.query(ctx.select(SHIPPERS.SHIPPERID, SHIPPERS.SHIPPERNAME).from(SHIPPERS))
@@ -105,3 +105,4 @@ CommonTableExpression<Record2<Integer, String>> cte = tmp.toCommonTable("cte");
 Лицензировано по [Apache License 2.0](LICENSE).
 
 © 2025 One Query API contributors
+
