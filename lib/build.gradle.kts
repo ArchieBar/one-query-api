@@ -62,6 +62,12 @@ spotless {
         removeUnusedImports()
         toggleOffOn()
         lineEndings = LineEnding.GIT_ATTRIBUTES
+        licenseHeaderFile(
+            rootProject.file("config/spotless/license-header.java"),
+            "(package|import|module)\\b",
+        )
+        target("src/**/*.java")
+        targetExclude("**/build/**", "**/generated/**", "**/src/**/generated/**")
     }
 
     kotlinGradle {

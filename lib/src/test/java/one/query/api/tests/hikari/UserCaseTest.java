@@ -1,3 +1,18 @@
+/*
+ * Copyright 2025 One Query API contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package one.query.api.tests.hikari;
 
 import static one.query.api.configuration.FieldConfig.C_CNAME;
@@ -12,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.List;
 import java.util.UUID;
 import one.query.api.AbstractIsolatedEnvironment;
+import one.query.api.OneQueryCommonTableStep;
 import one.query.api.configuration.FieldConfig;
 import one.query.api.impl.OneQuery;
 import one.query.api.jooq.generated.demo_schema.tables.records.CustomersRecord;
@@ -19,6 +35,8 @@ import one.query.api.model.Filter;
 import one.query.api.model.Page;
 import one.query.api.model.PaginationResult;
 import one.query.api.model.Sort;
+import org.jooq.CommonTableExpression;
+import org.jooq.Record2;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -72,12 +90,12 @@ class UserCaseTest extends AbstractIsolatedEnvironment {
   @Test
   @DisplayName("Test CTE")
   void test4() {
-    var tmp =
+    OneQueryCommonTableStep<Record2<Integer, String>> tmp =
         OneQuery.query(ctx.select(SHIPPERS.SHIPPERID, SHIPPERS.SHIPPERNAME).from(SHIPPERS))
             .paginate(0, 2)
             .fields("id", "name");
-    var total = tmp.getTotal();
-    var cte = tmp.toCommonTable("test");
+    Long total = tmp.getTotal();
+    CommonTableExpression<Record2<Integer, String>> cte = tmp.toCommonTable("test");
 
     var res = ctx.with(cte).select(cte.field("id")).from(cte).fetch();
 
