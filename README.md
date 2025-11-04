@@ -22,24 +22,71 @@ One Query API — это надстройка над [jOOQ](https://www.jooq.org
 - Поддерживаемый драйвер БД и диалект, совместимый с jOOQ (из коробки — PostgreSQL)
 
 ## Установка
-### Gradle (Kotlin DSL)
+### Сборка из исходников
+1. Склонируйте репозиторий и установите зависимости:
+   ```bash
+   git clone https://github.com/ArchieBar/one-query-api.git
+   cd one-query-api
+   ./gradlew clean build
+   ```
+2. Готовый JAR появится в `build/libs/`. Его можно подключить вручную или опубликовать в локальный/удалённый Maven.
+
+### Использование через Maven Local
+1. Опубликуйте библиотеку в локальный репозиторий:
+   ```bash
+   ./gradlew publishToMavenLocal
+   ```
+2. Добавьте `mavenLocal()` в секцию репозиториев Gradle либо `~/.m2/repository` в настройках Maven.
+
+#### Gradle (Kotlin DSL)
 ```kotlin
-implementation("one.query.api:one-query-api:0.0.9")
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation("one.query.api:one-query-api:0.0.9")
+}
 ```
 
-### Gradle (Groovy DSL)
-```groovy
-implementation 'one.query.api:one-query-api:0.0.9'
-```
-
-### Maven
+#### Maven
 ```xml
-<dependency>
-  <groupId>one.query.api</groupId>
-  <artifactId>one-query-api</artifactId>
-  <version>0.0.9</version>
-</dependency>
+<repositories>
+  <repository>
+    <id>local</id>
+    <url>file://${user.home}/.m2/repository</url>
+  </repository>
+</repositories>
 ```
+
+### Публикация в Nexus или другой удалённый репозиторий
+1. Настройте учётные данные в `~/.gradle/gradle.properties`:
+   ```properties
+   nexusUrl=https://nexus.example.com/repository/maven-releases/
+   nexusUsername=your-username
+   nexusPassword=your-password
+   ```
+2. Обновите `build.gradle.kts`, добавив задачу публикации (пример):
+   ```kotlin
+   publishing {
+       repositories {
+           maven {
+               name = "Nexus"
+               url = uri(findProperty("nexusUrl") as String)
+               credentials {
+                   username = findProperty("nexusUsername") as String
+                   password = findProperty("nexusPassword") as String
+               }
+           }
+       }
+   }
+   ```
+3. Запустите публикацию:
+   ```bash
+   ./gradlew publish
+   ```
+4. После публикации подключайте зависимость через URL Nexus в настройках Gradle/Maven вашего проекта.
 
 ## Конфигурация
 1. Зарегистрируйте подходящий `OneQueryMapper` для используемого диалекта, например PostgreSQL:
@@ -105,4 +152,5 @@ CommonTableExpression<Record2<Integer, String>> cte = tmp.toCommonTable("cte");
 Лицензировано по [Apache License 2.0](LICENSE).
 
 © 2025 One Query API contributors
+
 
